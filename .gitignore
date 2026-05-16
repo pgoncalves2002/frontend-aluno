@@ -1,0 +1,31 @@
+node_modules
+dist
+dist-ssr
+*.local
+.vite
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# env (apenas o exemplo é commitado)
+.env
+.env.local
+.env.*.local
+
+# editores
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
