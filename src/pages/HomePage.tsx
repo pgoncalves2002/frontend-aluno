@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
+  CalendarClock,
   CalendarOff,
   ChevronRight,
   Clock,
@@ -18,6 +19,7 @@ import { listMyWorkouts } from "@/api/workouts";
 import type { WorkoutListItem } from "@/api/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { validityLabel } from "@/lib/format";
 import { useAuthStore } from "@/stores/authStore";
 
 /**
@@ -161,7 +163,7 @@ export default function HomePage() {
                     <div className="text-sm text-muted-foreground truncate">
                       {w.focus || "Sem foco definido"}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 flex-wrap">
                       <span className="inline-flex items-center gap-1">
                         <ListChecks className="size-3" />
                         {w.exercises_count} exercícios
@@ -170,6 +172,12 @@ export default function HomePage() {
                         <Clock className="size-3" />
                         ~{w.estimated_duration_minutes} min
                       </span>
+                      {validityLabel(w.valid_from, w.valid_until) && (
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarClock className="size-3" />
+                          {validityLabel(w.valid_from, w.valid_until)}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <ChevronRight className="size-4 text-muted-foreground mt-2 shrink-0" />
