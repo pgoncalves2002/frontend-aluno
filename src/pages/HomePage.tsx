@@ -3,21 +3,79 @@
  * pra tela de detalhe (onde também rola o botão "Iniciar treino").
  */
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, ChevronRight, Clock, Dumbbell, ListChecks } from "lucide-react";
+import {
+  Calendar,
+  CalendarOff,
+  ChevronRight,
+  Clock,
+  Dumbbell,
+  ListChecks,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { listMyWorkouts } from "@/api/workouts";
+import type { WorkoutListItem } from "@/api/types";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/stores/authStore";
+
+/**
+ * Hoje em "yyyy-MM-dd" no fuso local do device — alinhado com `date.today()`
+ * do backend Django. Strings ISO no formato zero-padded são comparáveis
+ * lexicograficamente (`"2026-05-18" < "2026-12-01"` em string == em data).
+ */
+function todayISO(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Decida se a ficha está dentro da janela de validade HOJE.
+ *
+ * Espelha `Workout.is_visible_to_student(today)` do backend. O servidor já
+ * filtra fichas fora da janela pro aluno (em /api/workouts/ e /api/sync/),
+ * mas TanStack Query cacheia o response em memória — se o aluno manter a
+ * aba aberta passando da meia-noite, uma ficha `active` pode virar
+ * `expired` sem refetch. Filtramos no cliente também, e mostramos um
+ * aviso "atualize" pra cobrir esse gap.
+ */
+function isVisibleToday(w: WorkoutListItem, today = todayISO()): boolean {
+  if (w.valid_from && today < w.valid_from) return false;
+  if (w.valid_until && today > w.valid_until) return false;
+  return true;
+}
 
 export default function HomePage() {
   const { user } = useAuthStore();
   const greetingName = user?.display_name || user?.username || "";
 
-  const { data: workouts, isLoading, error } = useQuery({
+  const {
+    data: allWorkouts,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery({
     queryKey: ["my-workouts"],
     queryFn: listMyWorkouts,
   });
+
+  // Memoizado pra não recalcular hoje a cada render (o valor de `today`
+  // muda só de 24h em 24h em uso normal). Recalcular na mount já cobre o
+  // caso "aba aberta na virada do dia" porque o user vai navegar de novo.
+  const { workouts, hiddenByValidityCount } = useMemo(() => {
+    if (!allWorkouts) return { workouts: [] as WorkoutListItem[], hiddenByValidityCount: 0 };
+    const today = todayISO();
+    const visible = allWorkouts.filter((w) => isVisibleToday(w, today));
+    return {
+      workouts: visible,
+      hiddenByValidityCount: allWorkouts.length - visible.length,
+    };
+  }, [allWorkouts]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -33,6 +91,29 @@ export default function HomePage() {
             : "Suas fichas vão aparecer aqui."}
         </p>
       </div>
+
+      {hiddenByValidityCount > 0 && (
+        <Card className="p-3 flex items-center gap-3 border-amber-500/40 bg-amber-500/5">
+          <CalendarOff className="size-5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <div className="flex-1 text-sm">
+            <div className="font-medium">
+              {hiddenByValidityCount} ficha
+              {hiddenByValidityCount > 1 ? "s" : ""} fora do período
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Atualize pra ver o catálogo mais recente.
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
+            {isFetching ? "Atualizando…" : "Atualizar"}
+          </Button>
+        </Card>
+      )}
 
       {isLoading && (
         <div className="flex flex-col gap-2">

@@ -54,6 +54,19 @@ export interface Exercise {
 }
 
 // ---------- Ficha + exercícios da ficha ----------
+
+/**
+ * Status computado da janela de validade da ficha:
+ *   - `unbounded` — sem limites (vale pra sempre)
+ *   - `scheduled` — `valid_from` no futuro (aluno ainda não vê)
+ *   - `active`    — dentro da janela hoje
+ *   - `expired`   — `valid_until` no passado (aluno não vê mais)
+ *
+ * Em tese pro aluno só chegam `unbounded` e `active` (servidor filtra),
+ * mas mantemos a union completa pra TypeScript exhaustiveness.
+ */
+export type ValidityStatus = "unbounded" | "scheduled" | "active" | "expired";
+
 export interface WorkoutListItem {
   id: string;
   student: number;
@@ -63,6 +76,12 @@ export interface WorkoutListItem {
   day_label: string;
   notes: string;
   is_archived: boolean;
+  /** ISO "YYYY-MM-DD" ou null. Antes dessa data, aluno não vê a ficha. */
+  valid_from: string | null;
+  /** ISO "YYYY-MM-DD" ou null. Depois dessa data, aluno não vê a ficha. */
+  valid_until: string | null;
+  /** Read-only — derivado de valid_from/valid_until pelo backend. */
+  validity_status: ValidityStatus;
   exercises_count: number;
   estimated_duration_minutes: number;
   created_at: string;
