@@ -5,13 +5,21 @@
  */
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Clock, Dumbbell, ListChecks, Play } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarClock,
+  Clock,
+  Dumbbell,
+  ListChecks,
+  Play,
+} from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { startSession } from "@/api/sessions";
 import type { WorkoutExercise } from "@/api/types";
 import { getWorkout } from "@/api/workouts";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { validityLabel } from "@/lib/format";
 
 export default function WorkoutDetailPage() {
   const { workoutId } = useParams<{ workoutId: string }>();
@@ -71,7 +79,7 @@ export default function WorkoutDetailPage() {
               <div className="text-sm text-muted-foreground">
                 {workout.focus || "Sem foco definido"}
               </div>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 flex-wrap">
                 <span className="inline-flex items-center gap-1">
                   <ListChecks className="size-3" />
                   {workout.exercises_count} exercícios
@@ -80,6 +88,12 @@ export default function WorkoutDetailPage() {
                   <Clock className="size-3" />
                   ~{workout.estimated_duration_minutes} min
                 </span>
+                {validityLabel(workout.valid_from, workout.valid_until) && (
+                  <span className="inline-flex items-center gap-1 text-primary font-medium">
+                    <CalendarClock className="size-3" />
+                    {validityLabel(workout.valid_from, workout.valid_until)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
