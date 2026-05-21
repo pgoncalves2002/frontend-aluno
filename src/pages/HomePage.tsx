@@ -6,6 +6,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
+  AlertTriangle,
   Calendar,
   CalendarClock,
   CalendarOff,
@@ -13,10 +14,11 @@ import {
   Clock,
   Dumbbell,
   ListChecks,
+  Lock,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { listMyWorkouts } from "@/api/workouts";
-import type { WorkoutListItem } from "@/api/types";
+import type { User, WorkoutListItem } from "@/api/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { validityLabel } from "@/lib/format";
@@ -79,6 +81,16 @@ export default function HomePage() {
     };
   }, [allWorkouts]);
 
+  // Acesso expirado → bloqueia conteúdo principal. Aluno consegue logar
+  // mas vê só essa tela + abas Histórico/Personal.
+  if (user && user.is_student && !user.is_within_validity) {
+    return <AccessExpiredCard user={user} />;
+  }
+
+  // Aviso quando faltam <= 7 dias pra expirar (alerta antecipado).
+  const daysUntil = daysUntilExpiry(user?.active_until ?? null);
+  const showExpiryWarning = daysUntil !== null && daysUntil >= 0 && daysUntil <= 7;
+
   return (
     <div className="flex flex-col gap-5">
       <div>
@@ -93,6 +105,24 @@ export default function HomePage() {
             : "Suas fichas vão aparecer aqui."}
         </p>
       </div>
+
+      {showExpiryWarning && (
+        <Card className="p-3 flex items-start gap-3 border-amber-500/40 bg-amber-500/5">
+          <AlertTriangle className="size-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1 text-sm">
+            <div className="font-medium">
+              {daysUntil === 0
+                ? "Sua validade vence hoje"
+                : daysUntil === 1
+                  ? "Sua validade vence amanhã"
+                  : `Sua validade vence em ${daysUntil} dias`}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Fale com seu personal pra renovar.
+            </div>
+          </div>
+        </Card>
+      )}
 
       {hiddenByValidityCount > 0 && (
         <Card className="p-3 flex items-center gap-3 border-amber-500/40 bg-amber-500/5">
@@ -189,4 +219,48 @@ export default function HomePage() {
       )}
     </div>
   );
+}
+
+/**
+ * Tela mostrada quando `is_within_validity=false`. Aluno logado mas sem
+ * acesso às fichas. Mostra fonte do bloqueio + CTA pra falar com o personal.
+ */
+function AccessExpiredCard({ user }: { user: User }) {
+  const expiredOn = user.active_until ? formatBR(user.active_until) : null;
+  return (
+    <div className="flex flex-col gap-5">
+      <Card className="p-6 flex flex-col items-center gap-3 text-center">
+        <div className="size-14 rounded-full bg-destructive/10 flex items-center justify-center">
+          <Lock className="size-7 text-destructive" />
+        </div>
+        <h1 className="text-xl font-bold">Acesso expirado</h1>
+        <p className="text-sm text-muted-foreground max-w-md">
+          {expiredOn
+            ? `Sua validade venceu em ${expiredOn}.`
+            : "Sua validade venceu."}{" "}
+          Fale com seu personal pra renovar o acesso.
+        </p>
+        <div className="flex gap-2 mt-2">
+          <Link to="/personal">
+            <Button>Falar com o personal</Button>
+          </Link>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+/** Dias entre hoje e a data ISO (YYYY-MM-DD). null se inválido/sem data. */
+function daysUntilExpiry(activeUntilIso: string | null): number | null {
+  if (!activeUntilIso) return null;
+  const today = new Date(todayISO() + "T00:00:00");
+  const target = new Date(activeUntilIso + "T00:00:00");
+  if (Number.isNaN(target.getTime())) return null;
+  const diffMs = target.getTime() - today.getTime();
+  return Math.floor(diffMs / (24 * 60 * 60 * 1000));
+}
+
+function formatBR(iso: string): string {
+  const parts = iso.slice(0, 10).split("-");
+  return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : iso;
 }
