@@ -21,6 +21,10 @@ export interface User {
   uses_internal_payment: boolean;
   is_trainer: boolean;
   is_student: boolean;
+  /** ISO "YYYY-MM-DD" ou null. Define limite de acesso ao app. */
+  active_until: string | null;
+  /** True se o aluno está dentro da validade do acesso. */
+  is_within_validity: boolean;
 }
 
 export interface LoginRequest {
