@@ -6,10 +6,12 @@
 
 /*
   Tokens da identidade visual FichaGym (mai/2026):
-    - Ignite (laranja) — primary; sai do iOS systemBlue antigo.
-    - Volt (verde-limão) — accent secundário (charts e highlights).
+    - Ignite (laranja) — ÚNICA cor de marca. Primary, CTAs, highlights.
     - Ink/Graphite — base escura (dark mode).
-    - Slate — neutros.
+    - Slate — neutros (secundário = Slate, sem cor de acento).
+
+  Sem verde Volt: os 3 verdes funcionais (success, WhatsApp, "em curso")
+  não devem competir com a marca.
 
   Em light mode os fundos ficam quase brancos; em dark mode usam Ink+Graphite.
   O usuário herda do `prefers-color-scheme` do device (sem toggle manual no
