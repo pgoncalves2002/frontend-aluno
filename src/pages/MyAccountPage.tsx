@@ -6,7 +6,18 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle2, Mail, Phone, Save, UserCircle2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarClock,
+  CheckCircle2,
+  Infinity as InfinityIcon,
+  Mail,
+  Phone,
+  Save,
+  ShieldCheck,
+  ShieldX,
+  UserCircle2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMe, updateMe } from "@/api/auth";
@@ -175,8 +186,67 @@ export default function MyAccountPage() {
           </div>
         </Card>
       )}
+
+      {me && me.is_student && <PlanValidityCard me={me} />}
     </div>
   );
+}
+
+/**
+ * Card "Validade do plano" — mostra até quando o aluno tem acesso ao app.
+ * Sempre visível pra alunos; o trainer é quem define a data no SPA coach.
+ */
+function PlanValidityCard({
+  me,
+}: {
+  me: { active_until: string | null; is_within_validity: boolean };
+}) {
+  const expired = !me.is_within_validity;
+  const unlimited = me.active_until == null;
+  return (
+    <Card className="p-5 flex flex-col gap-2 mt-4">
+      <div className="flex items-center gap-2">
+        <CalendarClock className="size-5 text-primary" />
+        <h2 className="text-lg font-semibold">Validade do plano</h2>
+      </div>
+
+      {unlimited && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <InfinityIcon className="size-4" />
+          Sem prazo de expiração — acesso liberado.
+        </div>
+      )}
+
+      {!unlimited && !expired && (
+        <div className="flex items-center gap-2 text-sm">
+          <ShieldCheck className="size-4 text-emerald-600" />
+          <span>
+            Acesso válido até <strong>{formatBR(me.active_until!)}</strong>
+          </span>
+        </div>
+      )}
+
+      {!unlimited && expired && (
+        <div className="flex items-center gap-2 text-sm">
+          <ShieldX className="size-4 text-destructive" />
+          <span>
+            Acesso venceu em <strong>{formatBR(me.active_until!)}</strong>.
+            Fale com seu personal pra renovar.
+          </span>
+        </div>
+      )}
+
+      <p className="text-[11px] text-muted-foreground">
+        Seu personal define quando o plano expira. Quando vencer, suas fichas
+        ficam ocultas até a renovação.
+      </p>
+    </Card>
+  );
+}
+
+function formatBR(iso: string): string {
+  const parts = iso.slice(0, 10).split("-");
+  return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : iso;
 }
 
 function extractValidationError(err: unknown): string {
