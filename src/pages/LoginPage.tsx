@@ -1,4 +1,5 @@
-import { AlertTriangle, Dumbbell, Lock, User as UserIcon } from "lucide-react";
+import { AlertTriangle, Lock, User as UserIcon } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
 import { login } from "@/api/auth";
@@ -46,13 +47,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <div className="w-full max-w-sm flex flex-col gap-6">
-        <div className="flex flex-col items-center gap-3">
-          <div className="size-20 rounded-full bg-accent flex items-center justify-center">
-            <Dumbbell className="size-9 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold">FichaGym</h1>
+    <div
+      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(ellipse 80% 60% at 50% -10%, hsl(var(--primary) / 0.18) 0%, hsl(var(--background)) 65%)",
+      }}
+    >
+      <div className="w-full max-w-sm flex flex-col gap-6 relative z-10">
+        <div className="flex flex-col items-center gap-4">
+          <Logo variant="mark" height={88} className="rounded-2xl shadow-lg" />
+          <h1 className="font-display text-3xl font-bold tracking-tight">FichaGym</h1>
           <p className="text-sm text-muted-foreground text-center">
             Entre pra ver seus treinos.
           </p>

@@ -35,11 +35,20 @@ export default {
         },
         ring: "hsl(var(--ring))",
         input: "hsl(var(--input))",
+        // Semânticas da marca — usadas em badges/banners (success/warning/info).
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        info: "hsl(var(--info))",
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', 'Inter', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        card: "16px",
       },
       keyframes: {
         "fade-in": {
