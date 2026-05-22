@@ -1,7 +1,8 @@
-import { Dumbbell, KeyRound, LogOut, UserCircle2 } from "lucide-react";
+import { KeyRound, LogOut, UserCircle2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -17,11 +18,8 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto max-w-3xl flex items-center justify-between px-4 py-3">
-        <Link to="/" className="flex items-center gap-2 font-semibold">
-          <div className="size-8 rounded-lg bg-accent flex items-center justify-center">
-            <Dumbbell className="size-4 text-primary" />
-          </div>
-          <span>FichaGym</span>
+        <Link to="/" className="flex items-center" aria-label="Início — FichaGym">
+          <Logo variant="horizontal" height={28} />
         </Link>
         <div className="flex items-center gap-2">
           <Link to="/me" className="hidden sm:inline" title="Minha conta">
