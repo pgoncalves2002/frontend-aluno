@@ -1,7 +1,7 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
   <rect width="1024" height="1024" rx="228" fill="#161B22" stroke="#222A35" stroke-width="4"/>
-  <!-- topo em Ignite, demais em Slate (igual ao mark do HTML) -->
+  <!-- 3 barras Ignite (espelha o ícone claro: topo cheio, demais a 60%) -->
   <rect x="300" y="276" width="424" height="120" rx="40" fill="#FF4D1C"/>
-  <rect x="300" y="452" width="297" height="120" rx="40" fill="#9AA4B2"/>
-  <rect x="300" y="628" width="195" height="120" rx="40" fill="#9AA4B2"/>
+  <rect x="300" y="452" width="297" height="120" rx="40" fill="#FF4D1C" fill-opacity="0.6"/>
+  <rect x="300" y="628" width="195" height="120" rx="40" fill="#FF4D1C" fill-opacity="0.6"/>
 </svg>
