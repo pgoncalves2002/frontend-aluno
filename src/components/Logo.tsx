@@ -5,10 +5,12 @@
  *   - `mark`        — só o símbolo (3 barras dentro do quadrado Graphite).
  *   - `horizontal`  — símbolo + wordmark "FichaGym".
  *
- * O SVG `logo-mark-dark.svg` tem fundo escuro embutido; o `logo-horizontal.svg`
- * usa wordmark escuro (pra fundo claro). Pra fundo escuro, usamos
- * `logo-horizontal-dark.svg`. Pra simplificar, deixamos um `theme="auto"`
- * que usa <picture> + media query.
+ * Pra escolher light/dark, **usamos Tailwind classes** (`dark:hidden` /
+ * `hidden dark:block`) em vez de `<picture media=prefers-color-scheme>` —
+ * o `<picture>` olhava o tema do SISTEMA OPERACIONAL, não do app, então
+ * mesmo num app em light mode com o macOS em dark, ele carregava o SVG
+ * `-dark` (que tem "Ficha" em branco) e a parte preta sumia no fundo
+ * branco. Tailwind respeita o tema real da SPA.
  */
 type Variant = "mark" | "horizontal";
 
@@ -28,6 +30,9 @@ export function Logo({
   alt = "FichaGym",
 }: LogoProps) {
   if (variant === "mark") {
+    // O `mark-dark` tem o tile Graphite escuro com barras Ignite —
+    // funciona OK em fundo claro (alto contraste). Sem variante light
+    // por enquanto.
     return (
       <img
         src="/logo-mark-dark.svg"
@@ -38,21 +43,29 @@ export function Logo({
       />
     );
   }
-  // Horizontal: escolhe SVG conforme prefers-color-scheme via <picture>.
-  // Tailwind class `dark:` controla via container; usar <picture> garante
-  // que mesmo sem dark class no html, o sistema do device é respeitado.
+
+  const h = height ?? 32;
+  const baseStyle = { height: h + "px", width: "auto" };
+
   return (
-    <picture className={className}>
-      <source
-        srcSet="/logo-horizontal-dark.svg"
-        media="(prefers-color-scheme: dark)"
-      />
+    <>
+      {/* light mode: "Ficha" em Ink, "Gym" em Ignite */}
       <img
         src="/logo-horizontal.svg"
         alt={alt}
-        height={height ?? 32}
-        style={{ height: (height ?? 32) + "px", width: "auto" }}
+        height={h}
+        style={baseStyle}
+        className={"block dark:hidden " + (className ?? "")}
       />
-    </picture>
+      {/* dark mode: "Ficha" em branco, "Gym" em Ignite */}
+      <img
+        src="/logo-horizontal-dark.svg"
+        alt={alt}
+        height={h}
+        style={baseStyle}
+        className={"hidden dark:block " + (className ?? "")}
+        aria-hidden="true"
+      />
+    </>
   );
 }
